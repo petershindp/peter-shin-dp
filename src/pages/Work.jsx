@@ -48,7 +48,7 @@ export default function Work() {
 							alt={item.title}
 							className="thumbnail"
 							loading="lazy"
-							onLoad={(e) => e.target.classList.add("loaded")}
+							onLoad={(e) => e.target.parentElement.classList.add("loaded")} // Add 'loaded' class to the parent container
 						/>
 						<div className="preview-container">
 							<div className="preview-title">{item.title}</div>

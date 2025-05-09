@@ -35,7 +35,12 @@ const Navbar = () => {
 				{!menuOpen && <Navbarlinks />}
 
 				<div className="navbar-toggle">
-					<Hamburger toggled={menuOpen} toggle={setMenuOpen} size={20} />
+					<Hamburger
+						toggled={menuOpen}
+						toggle={setMenuOpen}
+						size={20}
+						color={"#000"}
+					/>
 				</div>
 			</div>
 

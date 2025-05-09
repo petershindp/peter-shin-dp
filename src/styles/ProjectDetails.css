@@ -67,7 +67,7 @@
 .project-still {
 	width: 100%;
 	height: auto;
-	border: 1px solid #ddd;
+	border: none;
 }
 
 @media (max-width: 768px) {

@@ -47,6 +47,8 @@ export default function Work() {
 							src={urlFor(item.thumbnail).width(1920).quality(100).url()} // Increase width and set quality
 							alt={item.title}
 							className="thumbnail"
+							loading="lazy"
+							onLoad={(e) => e.target.classList.add("loaded")}
 						/>
 						<div className="preview-container">
 							<div className="preview-title">{item.title}</div>

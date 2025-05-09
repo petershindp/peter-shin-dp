@@ -34,7 +34,6 @@ export default function ProjectDetails() {
 			.fetch(
 				`*[_type == "project" && _id == $id][0]{
                     title,
-                    "videoUrl": videoFile.asset->url,
                     thumbnail,
 					description,
                     stills,
@@ -48,6 +47,7 @@ export default function ProjectDetails() {
 			);
 	}, [id]);
 
+	console.log("Project Details:", project);
 	if (!project) return <></>;
 
 	return (

@@ -1,0 +1,27 @@
+.main-container {
+	display: flex;
+	flex-direction: column;
+
+	width: 100vw;
+	height: 100vh;
+}
+.container {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards; /* Fade-in animation */
+}
+
+/* Reuse the fadeIn animation */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px); /* Optional: slight upward motion */
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

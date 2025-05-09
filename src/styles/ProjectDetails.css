@@ -1,0 +1,89 @@
+.project-details {
+	padding: 2rem;
+	text-align: center;
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards; /* Fade-in animation for the entire container */
+}
+
+.project-title {
+	text-transform: uppercase;
+	font-weight: bold;
+	letter-spacing: 2px;
+	font-size: 2.5rem;
+	margin-top: 2rem;
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards;
+	animation-delay: 0.4s; /* Slight delay for staggered effect */
+}
+
+.project-description {
+	font-size: 1.2rem;
+	line-height: 1.5;
+	margin-bottom: 2rem;
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards;
+	animation-delay: 0.6s; /* Slight delay for staggered effect */
+}
+
+.project-media {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 1rem;
+	margin-bottom: 2rem;
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards;
+	animation-delay: 0.2s; /* Slight delay for staggered effect */
+	width: 100%;
+	max-width: 1200px; /* Constrain the width */
+	margin: auto; /* Center the media */
+	position: relative; /* Required for aspect ratio */
+	padding-top: 56.25%; /* 16:9 aspect ratio (9 / 16 = 0.5625 * 100) */
+}
+
+.project-video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%; /* Fill the container while maintaining aspect ratio */
+	border: none;
+}
+
+.project-stills {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr); /* 2 columns by default */
+	gap: 1rem;
+	margin-top: 2rem;
+	opacity: 0; /* Start hidden */
+	animation: fadeIn 1s ease-in-out forwards;
+	animation-delay: 0.6s; /* Slight delay for staggered effect */
+	width: 100%;
+	max-width: 1200px; /* Constrain the width */
+	margin: auto; /* Center the grid */
+	justify-content: center;
+}
+
+.project-still {
+	width: 100%;
+	height: auto;
+	border: 1px solid #ddd;
+}
+
+@media (max-width: 768px) {
+	.project-stills {
+		grid-template-columns: 1fr; /* 1 column for smaller screens */
+	}
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(20px); /* Optional: slight upward motion */
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}

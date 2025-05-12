@@ -115,6 +115,11 @@
 	z-index: 2; /* Ensure the title is above the video */
 	pointer-events: none; /* Prevent the title from interfering with mouse events */
 }
-.grid-item:hover .preview-title {
-	opacity: 1; /* Show the title on hover */
+.grid-item:hover .preview-title,
+.grid-item:focus .preview-title {
+	opacity: 1; /* Show the title on hover or focus */
+}
+
+.grid-item:focus {
+	outline: none; /* Remove the default focus outline */
 }

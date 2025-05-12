@@ -41,7 +41,12 @@ export default function Work() {
 	return (
 		<div className="grid-container">
 			{projects.map((item) => (
-				<Link to={`/project/${item._id}`} key={item._id} className="grid-item">
+				<Link
+					to={`/project/${item._id}`}
+					key={item._id}
+					className="grid-item"
+					tabIndex="0"
+				>
 					<div className="media-wrapper">
 						<img
 							src={urlFor(item.thumbnail).width(1920).quality(100).url()} // Increase width and set quality

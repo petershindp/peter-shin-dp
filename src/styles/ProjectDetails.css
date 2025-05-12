@@ -76,6 +76,12 @@
 	.project-stills {
 		grid-template-columns: 1fr; /* 1 column for smaller screens */
 	}
+	.project-title {
+		font-size: 2rem; /* Adjust font size for smaller screens */
+	}
+	.project-description {
+		font-size: 0.9rem; /* Adjust font size for smaller screens */
+	}
 }
 
 /* Fade-in animation */

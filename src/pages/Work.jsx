@@ -58,6 +58,8 @@ export default function Work() {
 								muted
 								loop
 								autoPlay
+								playsInline
+								controls={false}
 								onMouseEnter={(e) => {
 									e.target.currentTime = 0; // Reset video to start
 								}}

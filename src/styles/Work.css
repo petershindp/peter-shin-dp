@@ -66,6 +66,7 @@
 	object-fit: cover;
 	transition: opacity 0.3s ease;
 	z-index: 1;
+	border: none;
 }
 
 .thumbnail {

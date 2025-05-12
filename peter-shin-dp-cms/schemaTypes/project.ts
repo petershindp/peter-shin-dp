@@ -50,6 +50,12 @@ export default defineType({
       type: 'number',
       description: 'Controls the order of items in the grid',
     }),
+    defineField({
+      name: 'hide',
+      title: 'Hide',
+      type: 'boolean',
+      description: 'Hide this project from the main page',
+    }),
   ],
   preview: {
     select: {

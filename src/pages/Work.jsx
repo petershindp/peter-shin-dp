@@ -28,12 +28,12 @@ export default function Work() {
 	useEffect(() => {
 		sanityClient
 			.fetch(
-				`*[_type == "project"] | order(order asc){
-                    _id,
-                    title,
-                    "videoUrl": videoFile.asset->url, // Fetch the video file URL
-                    thumbnail
-                }`
+				`*[_type == "project" && !hide] | order(order asc){
+					_id,
+					title,
+					"videoUrl": videoFile.asset->url, // Fetch the video file URL
+					thumbnail
+				}`
 			)
 			.then((data) => setProjects(data))
 			.catch((error) => console.error("Error fetching data:", error));

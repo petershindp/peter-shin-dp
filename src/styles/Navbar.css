@@ -36,11 +36,30 @@
 .navbar-links a {
 	color: #555;
 	text-decoration: none;
-	transition: color 0.3s ease;
+	font-weight: bold; /* Keep all links bold to prevent layout shift */
+	position: relative;
+	transition: color 0.3s ease; /* Smooth transition for color */
 }
 
-.navbar-links a:hover {
-	color: #000;
+.navbar-links a::after {
+	content: ""; /* Create the underline */
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: -5px; /* Adjust the space between the text and the underline */
+	height: 2px; /* Thickness of the underline */
+	background-color: transparent; /* Start with no underline */
+	transition:
+		background-color 0.3s ease,
+		transform 0.3s ease; /* Smooth animation for underline */
+	transform: scaleX(0); /* Start with no underline (collapsed) */
+	transform-origin: left; /* Animate from left to right */
+}
+
+.navbar-links a:hover::after,
+.navbar-links .active-link::after {
+	background-color: #000; /* Color of the underline */
+	transform: scaleX(1); /* Expand the underline */
 }
 
 /* Logo */

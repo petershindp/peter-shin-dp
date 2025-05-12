@@ -1,11 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import "../styles/Navbar.css";
 
 export default function Navbarlinks() {
 	return (
 		<div className="navbar-links">
-			<Link to="/work">Work</Link>
-			<Link to="/about">About</Link>
+			<NavLink
+				to="/work"
+				className={({ isActive }) =>
+					isActive || location.pathname === "/" ? "active-link" : ""
+				}
+			>
+				Work
+			</NavLink>
+			<NavLink
+				to="/about"
+				className={({ isActive }) => (isActive ? "active-link" : "")}
+			>
+				About
+			</NavLink>
 		</div>
 	);
 }

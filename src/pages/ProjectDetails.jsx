@@ -2,11 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { createClient } from "@sanity/client";
 import "../styles/ProjectDetails.css";
-import {
-	REEL_LINK,
-	SANITY_DATASET_NAME,
-	SANITY_PROJECT_ID,
-} from "../Constants";
+import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
 import imageUrlBuilder from "@sanity/image-url";
 import "lazysizes"; // Import lazysizes for lazy loading
 import "lazysizes/plugins/attrchange/ls.attrchange"; // Optional: Add lazysizes plugin for attribute changes

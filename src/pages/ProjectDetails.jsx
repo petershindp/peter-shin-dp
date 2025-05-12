@@ -8,6 +8,8 @@ import {
 	SANITY_PROJECT_ID,
 } from "../Constants";
 import imageUrlBuilder from "@sanity/image-url";
+import "lazysizes"; // Import lazysizes for lazy loading
+import "lazysizes/plugins/attrchange/ls.attrchange"; // Optional: Add lazysizes plugin for attribute changes
 
 // Initialize Sanity client
 const sanityClient = createClient({
@@ -54,17 +56,15 @@ export default function ProjectDetails() {
 		<div className="project-details">
 			{project.videoLink && (
 				<div className="project-media">
-					{/* Embed the video using an iframe if video exists*/}
-					{
-						<iframe
-							src={project.videoLink}
-							title={project.title}
-							className="project-video"
-							frameBorder="0"
-							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-							allowFullScreen
-						></iframe>
-					}
+					{/* Embed the video using an iframe if video exists */}
+					<iframe
+						src={project.videoLink}
+						title={project.title}
+						className="project-video"
+						frameBorder="0"
+						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+						allowFullScreen
+					></iframe>
 				</div>
 			)}
 			<div className="project-title">{project.title}</div>
@@ -75,9 +75,10 @@ export default function ProjectDetails() {
 				{project.stills?.map((still, index) => (
 					<img
 						key={index}
-						src={urlFor(still).width(1920).quality(100).url()}
+						src={urlFor(still).width(50).quality(10).url()} // Low-quality placeholder
+						data-src={urlFor(still).width(1920).quality(100).url()} // High-quality image
 						alt={`Still ${index + 1}`}
-						className="project-still"
+						className="project-still lazyload" // Add lazyload class for lazysizes
 					/>
 				))}
 			</div>

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"; // Import Link for navigation
 import "../styles/Work.css";
 import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
 import imageUrlBuilder from "@sanity/image-url";
+import "lazysizes";
 
 // Initialize Sanity client
 const sanityClient = createClient({
@@ -50,8 +51,9 @@ export default function Work() {
 					<div className="media-wrapper">
 						<img
 							src={urlFor(item.thumbnail).width(1920).quality(100).url()} // Increase width and set quality
+							data-src={urlFor(item.thumbnail).width(1920).quality(100).url()} // High-quality image
 							alt={item.title}
-							className="thumbnail"
+							className="thumbnail lazyload" // Add lazyload class for lazysizes
 							loading="lazy"
 							onLoad={(e) => e.target.parentElement.classList.add("loaded")} // Add 'loaded' class to the parent container
 						/>

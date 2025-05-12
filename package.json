@@ -15,6 +15,7 @@
 		"@sanity/image-url": "^1.1.0",
 		"framer-motion": "^12.10.1",
 		"hamburger-react": "^2.5.2",
+		"lazysizes": "^5.3.2",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
 		"react-router-dom": "^7.5.3",

@@ -71,7 +71,11 @@
 
 .thumbnail {
 	opacity: 0;
-	transition: opacity 0.5s ease; /* Smooth fade-in */
+	transition: opacity 0.5s ease-in-out;
+}
+
+.thumbnail.lazyloaded {
+	opacity: 1;
 }
 
 .media-wrapper.loaded .thumbnail {

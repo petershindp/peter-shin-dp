@@ -1,8 +1,6 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Work from "./pages/Work";
-import { Home } from "./pages/Home";
-import { About } from "./pages/About";
-import { Contact } from "./pages/Contact";
+import About from "./pages/About";
 import Navbar from "./navbar/Navbar";
 import ProjectDetails from "./pages/ProjectDetails";
 import "./styles/App.css";

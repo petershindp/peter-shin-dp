@@ -62,6 +62,9 @@ export default function About() {
 								className="about-link"
 								target="_blank"
 								rel="noopener noreferrer"
+								onClick={() =>
+									window.umami && window.umami.track("Email Link Clicked")
+								}
 							>
 								ssm.peter.shin@gmail.com
 							</a>
@@ -70,6 +73,9 @@ export default function About() {
 								className="about-link"
 								target="_blank"
 								rel="noopener noreferrer"
+								onClick={() =>
+									window.umami && window.umami.track("Instagram Link Clicked")
+								}
 							>
 								<FaInstagram className="ig-icon" />
 								Instagram

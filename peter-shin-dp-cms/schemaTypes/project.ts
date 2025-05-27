@@ -8,6 +8,13 @@ export default defineType({
   icon,
   fields: [
     defineField({
+      name: 'projectId',
+      title: 'Project ID',
+      type: 'string',
+      description: 'Unique identifier for the project, used for linking',
+      validation: (Rule) => Rule.required().min(1).max(50),
+    }),
+    defineField({
       name: 'title',
       title: 'Title',
       type: 'string',

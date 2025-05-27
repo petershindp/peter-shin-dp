@@ -29,7 +29,7 @@ export default function Work() {
 		sanityClient
 			.fetch(
 				`*[_type == "project" && !hide] | order(order asc){
-					_id,
+					projectId,
 					title,
 					"videoUrl": videoFile.asset->url, // Fetch the video file URL
 					thumbnail
@@ -43,8 +43,8 @@ export default function Work() {
 		<div className="grid-container">
 			{projects.map((item) => (
 				<Link
-					to={`/project/${item._id}`}
-					key={item._id}
+					to={`/project/${item.projectId}`}
+					key={item.projectId}
 					className="grid-item"
 					tabIndex="0"
 				>

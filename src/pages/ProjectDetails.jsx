@@ -30,7 +30,7 @@ export default function ProjectDetails() {
 	useEffect(() => {
 		sanityClient
 			.fetch(
-				`*[_type == "project" && _id == $id][0]{
+				`*[_type == "project" && projectId == $id][0]{
                     title,
                     thumbnail,
 					description,

@@ -19,7 +19,7 @@
 		padding-right: 5rem;
 	}
 }
-@media (min-width: 1024px) {
+@media (min-width: 1200px) {
 	.grid-container {
 		grid-template-columns: repeat(3, 1fr);
 		padding-left: 120px;

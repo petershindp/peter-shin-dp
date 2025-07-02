@@ -13,6 +13,7 @@ export default function App() {
 				<div className="container">
 					<Routes>
 						<Route path="/" element={<Work />} />
+						<Route path="/work" element={<Work />} />
 						<Route path="/project/:id" element={<ProjectDetails />} />
 						<Route path="/about" element={<About />} />
 					</Routes>

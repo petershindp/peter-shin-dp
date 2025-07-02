@@ -5,7 +5,7 @@ export default function Navbarlinks() {
 	return (
 		<div className="navbar-links">
 			<NavLink
-				to="/"
+				to="/work"
 				className={({ isActive }) =>
 					isActive || location.pathname === "/" ? "active-link" : ""
 				}

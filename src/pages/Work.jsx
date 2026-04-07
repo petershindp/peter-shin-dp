@@ -24,15 +24,30 @@ function urlFor(source) {
 // Helper function to get responsive thumbnail width
 const getThumbnailWidth = () => {
 	const width = window.innerWidth;
-	if (width < 768) return 480; // Mobile: 480px
-	if (width < 1200) return 720; // Tablet: 720px
-	return 1200; // Desktop: 1200px (reduced from 1920)
+	const pixelRatio = window.devicePixelRatio || 1;
+
+	// Account for device pixel ratio and padding
+	const availableWidth = width - 32; // Subtract padding (1rem = 16px * 2)
+
+	if (width < 768) {
+		// Mobile: use higher resolution for retina displays
+		return Math.min(Math.ceil(availableWidth * pixelRatio * 1.2), 800); // Max 800px
+	}
+	if (width < 1200) {
+		// Tablet: 2 columns
+		const columnWidth = (availableWidth - 64) / 2; // Subtract gap
+		return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1000); // Max 1000px
+	}
+	// Desktop: 3 columns
+	const columnWidth = (availableWidth - 128) / 3; // Subtract gaps
+	return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1200); // Max 1200px
 };
 
 const ProjectCard = ({ item }) => {
 	const containerRef = useRef(null);
 	const videoRef = useRef(null);
 	const [videoSrc, setVideoSrc] = useState(null);
+	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
 
 	// Lazy load video when element enters viewport
 	useEffect(() => {
@@ -59,17 +74,39 @@ const ProjectCard = ({ item }) => {
 	}, [item.videoUrl]);
 
 	const handleMouseEnter = () => {
-		if (videoRef.current) {
-			videoRef.current.currentTime = 0;
-			videoRef.current.play().catch(() => {
-				// Silently handle play failures (browsers may block autoplay)
-			});
+		// Only handle hover on non-touch devices
+		if (!("ontouchstart" in window)) {
+			if (videoRef.current) {
+				videoRef.current.currentTime = 0;
+				videoRef.current.play().catch(() => {
+					// Silently handle play failures (browsers may block autoplay)
+				});
+			}
 		}
 	};
 
 	const handleMouseLeave = () => {
+		// Only handle hover on non-touch devices
+		if (!("ontouchstart" in window)) {
+			if (videoRef.current) {
+				videoRef.current.pause();
+			}
+		}
+	};
+
+	const handleTouchStart = () => {
+		// Handle touch interactions on mobile
 		if (videoRef.current) {
-			videoRef.current.pause();
+			if (isTouchPlaying) {
+				videoRef.current.pause();
+				setIsTouchPlaying(false);
+			} else {
+				videoRef.current.currentTime = 0;
+				videoRef.current.play().catch(() => {
+					// Silently handle play failures (browsers may block autoplay)
+				});
+				setIsTouchPlaying(true);
+			}
 		}
 	};
 
@@ -80,6 +117,7 @@ const ProjectCard = ({ item }) => {
 			tabIndex="0"
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
+			onTouchStart={handleTouchStart}
 			ref={containerRef}
 		>
 			<div className="media-wrapper">

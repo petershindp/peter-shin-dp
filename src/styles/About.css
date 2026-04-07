@@ -24,10 +24,7 @@
 	object-fit: cover;
 	border-radius: 0; /* Not a circle by default */
 	display: block;
-	transition: transform 0.4s cubic-bezier(0.4, 2, 0.6, 1);
-}
-.about-photo:hover {
-	transform: scale(1.04) rotate(-2deg);
+	/* Removed hover transform animation */
 }
 
 .about-content {

@@ -43,7 +43,11 @@ export default function About() {
 						transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
 					>
 						<img
-							src={urlFor(about.photo).width(400).height(400).fit("crop").url()}
+							src={urlFor(about.photo)
+								.width(800)
+								.height(1000)
+								.fit("crop")
+								.url()}
 							alt="Peter Shin"
 							className="about-photo"
 						/>

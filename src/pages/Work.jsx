@@ -48,6 +48,7 @@ const ProjectCard = ({ item }) => {
 	const videoRef = useRef(null);
 	const [videoSrc, setVideoSrc] = useState(null);
 	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
+	const [supportsHover, setSupportsHover] = useState(true);
 
 	// Lazy load video when element enters viewport
 	useEffect(() => {
@@ -73,30 +74,38 @@ const ProjectCard = ({ item }) => {
 		};
 	}, [item.videoUrl]);
 
+	// Detect if device supports hover (cursor/trackpad)
+	useEffect(() => {
+		// Check if device has hover capability using media query
+		const mediaQuery = window.matchMedia("(hover: hover)");
+		setSupportsHover(mediaQuery.matches);
+
+		const handleChange = (e) => {
+			setSupportsHover(e.matches);
+		};
+
+		mediaQuery.addEventListener("change", handleChange);
+		return () => mediaQuery.removeEventListener("change", handleChange);
+	}, []);
+
 	const handleMouseEnter = () => {
-		// Only handle hover on non-touch devices
-		if (!("ontouchstart" in window)) {
-			if (videoRef.current) {
-				videoRef.current.currentTime = 0;
-				videoRef.current.play().catch(() => {
-					// Silently handle play failures (browsers may block autoplay)
-				});
-			}
+		if (supportsHover && videoRef.current) {
+			videoRef.current.currentTime = 0;
+			videoRef.current.play().catch(() => {
+				// Silently handle play failures (browsers may block autoplay)
+			});
 		}
 	};
 
 	const handleMouseLeave = () => {
-		// Only handle hover on non-touch devices
-		if (!("ontouchstart" in window)) {
-			if (videoRef.current) {
-				videoRef.current.pause();
-			}
+		if (supportsHover && videoRef.current) {
+			videoRef.current.pause();
 		}
 	};
 
 	const handleTouchStart = () => {
-		// Handle touch interactions on mobile
-		if (videoRef.current) {
+		// Only use touch if hover is not supported
+		if (!supportsHover && videoRef.current) {
 			if (isTouchPlaying) {
 				videoRef.current.pause();
 				setIsTouchPlaying(false);
@@ -166,6 +175,8 @@ export default function Work() {
 			.then((data) => setProjects(data))
 			.catch((error) => console.error("Error fetching data:", error));
 	}, []);
+
+	console.log("Fetched projects:", projects);
 
 	return (
 		<div className="grid-container">

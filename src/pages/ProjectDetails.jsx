@@ -1,58 +1,43 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { createClient } from "@sanity/client";
 import "../styles/ProjectDetails.css";
-import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
-import imageUrlBuilder from "@sanity/image-url";
-import "lazysizes"; // Import lazysizes for lazy loading
-import "lazysizes/plugins/attrchange/ls.attrchange"; // Optional: Add lazysizes plugin for attribute changes
-
-// Initialize Sanity client
-const sanityClient = createClient({
-	projectId: SANITY_PROJECT_ID,
-	dataset: SANITY_DATASET_NAME,
-	apiVersion: "2023-01-01",
-	useCdn: true,
-});
-
-// Initialize the image URL builder
-const builder = imageUrlBuilder(sanityClient);
-
-function urlFor(source) {
-	return builder.image(source);
-}
+import { sanityClient, urlFor } from "../sanity";
 
 export default function ProjectDetails() {
-	const { id } = useParams(); // Get the project ID from the URL
+	const { id } = useParams();
 	const [project, setProject] = useState(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
 
-	// Fetch project details from Sanity
 	useEffect(() => {
 		sanityClient
 			.fetch(
 				`*[_type == "project" && projectId == $id][0]{
-                    title,
-                    thumbnail,
+					title,
+					thumbnail,
 					description,
-                    stills,
-                    videoLink
-                }`,
-				{ id }
+					stills,
+					videoLink
+				}`,
+				{ id },
 			)
-			.then((data) => setProject(data))
-			.catch((error) =>
-				console.error("Error fetching project details:", error)
-			);
+			.then((data) => {
+				setProject(data);
+				setLoading(false);
+			})
+			.catch(() => {
+				setError(true);
+				setLoading(false);
+			});
 	}, [id]);
 
-	console.log("Project Details:", project);
-	if (!project) return <></>;
+	if (loading) return <></>;
+	if (error || !project) return <></>;
 
 	return (
 		<div className="project-details">
 			{project.videoLink && (
 				<div className="project-media">
-					{/* Embed the video using an iframe if video exists */}
 					<iframe
 						src={project.videoLink}
 						title={project.title}
@@ -60,24 +45,36 @@ export default function ProjectDetails() {
 						frameBorder="0"
 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
 						allowFullScreen
-					></iframe>
+					/>
 				</div>
 			)}
 			<div className="project-title">{project.title}</div>
 			{project.description && (
 				<div className="project-description">{project.description}</div>
 			)}
-			<div className="project-stills">
-				{project.stills?.map((still, index) => (
-					<img
-						key={index}
-						src={urlFor(still).width(50).quality(10).url()} // Low-quality placeholder
-						data-src={urlFor(still).width(1920).quality(100).url()} // High-quality image
-						alt={`Still ${index + 1}`}
-						className="project-still lazyload" // Add lazyload class for lazysizes
-					/>
-				))}
-			</div>
+			{project.stills?.length > 0 && (
+				<div className="project-stills">
+					{project.stills.map((still, index) => {
+						const base = urlFor(still).fit("crop").auto("format");
+						return (
+							<img
+								key={index}
+								src={base.width(800).url()}
+								srcSet={[
+									`${base.width(600).url()} 600w`,
+									`${base.width(1200).url()} 1200w`,
+									`${base.width(1920).url()} 1920w`,
+								].join(", ")}
+								sizes="(max-width: 768px) 100vw, 50vw"
+								alt={`${project.title} still ${index + 1}`}
+								className="project-still"
+								loading="lazy"
+								decoding="async"
+							/>
+						);
+					})}
+				</div>
+			)}
 		</div>
 	);
 }

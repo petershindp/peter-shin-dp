@@ -1,0 +1,727 @@
+diff --git a/.env.example b/.env.example
+new file mode 100644
+index 0000000..a24a4f3
+--- /dev/null
++++ b/.env.example
+@@ -0,0 +1,3 @@
++VITE_SANITY_PROJECT_ID=your_project_id
++VITE_SANITY_DATASET=production
++VITE_SANITY_API_VERSION=2023-01-01
+diff --git a/.gitignore b/.gitignore
+index a547bf3..be5a69d 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1,3 +1,8 @@
++# Environment variables
++.env
++.env.local
++.env.production
++
+ # Logs
+ logs
+ *.log
+diff --git a/README.md b/README.md
+index 7059a96..c0c0d79 100644
+--- a/README.md
++++ b/README.md
+@@ -1,12 +1,34 @@
+-# React + Vite
++# Peter Shin DP
+ 
+-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
++Portfolio website for Peter Shin, Director of Photography — built with React, Vite, and Sanity CMS.
+ 
+-Currently, two official plugins are available:
++## Stack
+ 
+-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
++- **React 19** + **React Router 7**
++- **Vite 6**
++- **Sanity** (headless CMS for projects, stills, and about page)
++- **Framer Motion** (page transitions)
++- **Umami** (privacy-friendly analytics)
+ 
+-## Expanding the ESLint configuration
++## Setup
+ 
+-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
++1. Clone the repo
++2. Copy `.env.example` to `.env` and fill in your Sanity credentials:
++   ```
++   VITE_SANITY_PROJECT_ID=your_project_id
++   VITE_SANITY_DATASET=production
++   VITE_SANITY_API_VERSION=2023-01-01
++   ```
++3. Install and run:
++   ```bash
++   npm install
++   npm run dev
++   ```
++
++## Sanity Studio
++
++```bash
++cd peter-shin-dp-cms
++npm install
++npx sanity dev
++```
+diff --git a/index.html b/index.html
+index 789392f..da6e236 100644
+--- a/index.html
++++ b/index.html
+@@ -4,11 +4,17 @@
+ 		<meta charset="UTF-8" />
+ 		<link rel="icon" type="image/svg+xml" href="/Logo SVG.svg" />
+ 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-		<title>Peter Shin - DoP</title>
++		<title>Peter Shin — Director of Photography</title>
+ 		<meta
+ 			name="description"
+-			content="LA based Director of Photography specializing in cinematic storytelling for film, commercial,documentary, and music video projects."
++			content="LA based Director of Photography specializing in cinematic storytelling for film, commercial, documentary, and music video projects."
+ 		/>
++		<meta property="og:title" content="Peter Shin — Director of Photography" />
++		<meta property="og:description" content="LA based Director of Photography specializing in cinematic storytelling." />
++		<meta property="og:type" content="website" />
++		<!-- Preconnect to Sanity CDN for faster image delivery -->
++		<link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
++		<link rel="dns-prefetch" href="https://cdn.sanity.io" />
+ 		<script
+ 			defer
+ 			src="https://cloud.umami.is/script.js"
+diff --git a/src/Constants.jsx b/src/Constants.jsx
+index 5704d7c..4ccb6fe 100644
+--- a/src/Constants.jsx
++++ b/src/Constants.jsx
+@@ -1,7 +1,3 @@
+-// SANITY
+-export const SANITY_PROJECT_ID = "jq6k3t9k";
+-export const SANITY_DATASET_NAME = "production";
+-
+ // LINKS
+ export const REEL_LINK =
+ 	"https://www.youtube.com/embed/B3JIvir-rao?si=6v0sKarXqusy9pg4";
+diff --git a/src/index.css b/src/index.css
+index ae5ff99..aaff3d4 100644
+--- a/src/index.css
++++ b/src/index.css
+@@ -1,68 +1,25 @@
++*, *::before, *::after {
++	box-sizing: border-box;
++}
++
+ :root {
+-	font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
++	font-family: system-ui, Helvetica, Arial, sans-serif;
+ 	line-height: 1.5;
+ 	font-weight: 400;
+-
+-	color-scheme: light dark;
+-	color: rgba(255, 255, 255, 0.87);
+-	background-color: #ffffff;
+-
+ 	font-synthesis: none;
+ 	text-rendering: optimizeLegibility;
+ 	-webkit-font-smoothing: antialiased;
+ 	-moz-osx-font-smoothing: grayscale;
+ }
+ 
+-a {
+-	font-weight: 500;
+-	color: #646cff;
+-	text-decoration: inherit;
+-}
+-a:hover {
+-	color: #535bf2;
+-}
+-
+ body {
+ 	margin: 0;
+-	display: flex;
+-	place-items: center;
+ 	min-width: 320px;
+ 	min-height: 100vh;
++	background-color: #ffffff;
++	color: #213547;
+ }
+ 
+-h1 {
+-	font-size: 3.2em;
+-	line-height: 1.1;
+-}
+-
+-button {
+-	border-radius: 8px;
+-	border: 1px solid transparent;
+-	padding: 0.6em 1.2em;
+-	font-size: 1em;
+-	font-weight: 500;
+-	font-family: inherit;
+-	background-color: #1a1a1a;
+-	cursor: pointer;
+-	transition: border-color 0.25s;
+-}
+-button:hover {
+-	border-color: #646cff;
+-}
+-button:focus,
+-button:focus-visible {
+-	outline: 4px auto -webkit-focus-ring-color;
+-}
+-
+-@media (prefers-color-scheme: light) {
+-	:root {
+-		color: #213547;
+-		background-color: #ffffff;
+-	}
+-	a:hover {
+-		color: #747bff;
+-	}
+-	button {
+-		background-color: #f9f9f9;
+-	}
++a {
++	text-decoration: inherit;
+ }
+diff --git a/src/navbar/Navbarlinks.jsx b/src/navbar/Navbarlinks.jsx
+index 29a5f8a..dd1961e 100644
+--- a/src/navbar/Navbarlinks.jsx
++++ b/src/navbar/Navbarlinks.jsx
+@@ -1,7 +1,9 @@
+-import { Link, NavLink } from "react-router-dom";
++import { NavLink, useLocation } from "react-router-dom";
+ import "../styles/Navbar.css";
+ 
+ export default function Navbarlinks() {
++	const location = useLocation();
++
+ 	return (
+ 		<div className="navbar-links">
+ 			<NavLink
+diff --git a/src/pages/About.jsx b/src/pages/About.jsx
+index 700dfcd..cb715ed 100644
+--- a/src/pages/About.jsx
++++ b/src/pages/About.jsx
+@@ -1,22 +1,10 @@
+ import React, { useEffect, useState } from "react";
+-import { createClient } from "@sanity/client";
+ import imageUrlBuilder from "@sanity/image-url";
+ import { motion } from "framer-motion";
+ import "../styles/About.css";
+-import { SANITY_PROJECT_ID, SANITY_DATASET_NAME } from "../Constants";
++import { sanityClient, urlFor } from "../sanity";
+ import { FaInstagram } from "react-icons/fa";
+ 
+-const sanityClient = createClient({
+-	projectId: SANITY_PROJECT_ID,
+-	dataset: SANITY_DATASET_NAME,
+-	apiVersion: "2023-01-01",
+-	useCdn: true,
+-});
+-const builder = imageUrlBuilder(sanityClient);
+-function urlFor(source) {
+-	return builder.image(source);
+-}
+-
+ export default function About() {
+ 	const [about, setAbout] = useState(null);
+ 
+@@ -43,13 +31,16 @@ export default function About() {
+ 						transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
+ 					>
+ 						<img
+-							src={urlFor(about.photo)
+-								.width(800)
+-								.height(1000)
+-								.fit("crop")
+-								.url()}
++							src={urlFor(about.photo).width(800).height(1000).fit("crop").auto("format").url()}
++							srcSet={[
++								`${urlFor(about.photo).width(420).height(520).fit("crop").auto("format").url()} 420w`,
++								`${urlFor(about.photo).width(800).height(1000).fit("crop").auto("format").url()} 800w`,
++							].join(", ")}
++							sizes="(max-width: 900px) 180px, 420px"
+ 							alt="Peter Shin"
+ 							className="about-photo"
++							loading="eager"
++							decoding="async"
+ 						/>
+ 					</motion.div>
+ 					<motion.div
+@@ -62,10 +53,8 @@ export default function About() {
+ 						<p className="about-text">{about.bio}</p>
+ 						<div className="about-links">
+ 							<a
+-								href="mailto:petershin.dp@gmail.com"
++								href="mailto:ssm.peter.shin@gmail.com"
+ 								className="about-link"
+-								target="_blank"
+-								rel="noopener noreferrer"
+ 								onClick={() =>
+ 									window.umami && window.umami.track("Email Link Clicked")
+ 								}
+diff --git a/src/pages/ProjectDetails.jsx b/src/pages/ProjectDetails.jsx
+index 22555e8..97633b2 100644
+--- a/src/pages/ProjectDetails.jsx
++++ b/src/pages/ProjectDetails.jsx
+@@ -1,58 +1,43 @@
+ import React, { useEffect, useState } from "react";
+ import { useParams } from "react-router-dom";
+-import { createClient } from "@sanity/client";
+ import "../styles/ProjectDetails.css";
+-import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
+-import imageUrlBuilder from "@sanity/image-url";
+-import "lazysizes"; // Import lazysizes for lazy loading
+-import "lazysizes/plugins/attrchange/ls.attrchange"; // Optional: Add lazysizes plugin for attribute changes
+-
+-// Initialize Sanity client
+-const sanityClient = createClient({
+-	projectId: SANITY_PROJECT_ID,
+-	dataset: SANITY_DATASET_NAME,
+-	apiVersion: "2023-01-01",
+-	useCdn: true,
+-});
+-
+-// Initialize the image URL builder
+-const builder = imageUrlBuilder(sanityClient);
+-
+-function urlFor(source) {
+-	return builder.image(source);
+-}
++import { sanityClient, urlFor } from "../sanity";
+ 
+ export default function ProjectDetails() {
+-	const { id } = useParams(); // Get the project ID from the URL
++	const { id } = useParams();
+ 	const [project, setProject] = useState(null);
++	const [loading, setLoading] = useState(true);
++	const [error, setError] = useState(false);
+ 
+-	// Fetch project details from Sanity
+ 	useEffect(() => {
+ 		sanityClient
+ 			.fetch(
+ 				`*[_type == "project" && projectId == $id][0]{
+-                    title,
+-                    thumbnail,
++					title,
++					thumbnail,
+ 					description,
+-                    stills,
+-                    videoLink
+-                }`,
+-				{ id }
++					stills,
++					videoLink
++				}`,
++				{ id },
+ 			)
+-			.then((data) => setProject(data))
+-			.catch((error) =>
+-				console.error("Error fetching project details:", error)
+-			);
++			.then((data) => {
++				setProject(data);
++				setLoading(false);
++			})
++			.catch(() => {
++				setError(true);
++				setLoading(false);
++			});
+ 	}, [id]);
+ 
+-	console.log("Project Details:", project);
+-	if (!project) return <></>;
++	if (loading) return <></>;
++	if (error || !project) return <></>;
+ 
+ 	return (
+ 		<div className="project-details">
+ 			{project.videoLink && (
+ 				<div className="project-media">
+-					{/* Embed the video using an iframe if video exists */}
+ 					<iframe
+ 						src={project.videoLink}
+ 						title={project.title}
+@@ -60,24 +45,36 @@ export default function ProjectDetails() {
+ 						frameBorder="0"
+ 						allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+ 						allowFullScreen
+-					></iframe>
++					/>
+ 				</div>
+ 			)}
+ 			<div className="project-title">{project.title}</div>
+ 			{project.description && (
+ 				<div className="project-description">{project.description}</div>
+ 			)}
+-			<div className="project-stills">
+-				{project.stills?.map((still, index) => (
+-					<img
+-						key={index}
+-						src={urlFor(still).width(50).quality(10).url()} // Low-quality placeholder
+-						data-src={urlFor(still).width(1920).quality(100).url()} // High-quality image
+-						alt={`Still ${index + 1}`}
+-						className="project-still lazyload" // Add lazyload class for lazysizes
+-					/>
+-				))}
+-			</div>
++			{project.stills?.length > 0 && (
++				<div className="project-stills">
++					{project.stills.map((still, index) => {
++						const base = urlFor(still).fit("crop").auto("format");
++						return (
++							<img
++								key={index}
++								src={base.width(800).url()}
++								srcSet={[
++									`${base.width(600).url()} 600w`,
++									`${base.width(1200).url()} 1200w`,
++									`${base.width(1920).url()} 1920w`,
++								].join(", ")}
++								sizes="(max-width: 768px) 100vw, 50vw"
++								alt={`${project.title} still ${index + 1}`}
++								className="project-still"
++								loading="lazy"
++								decoding="async"
++							/>
++						);
++					})}
++				</div>
++			)}
+ 		</div>
+ 	);
+ }
+diff --git a/src/pages/Work.jsx b/src/pages/Work.jsx
+index 9f839c6..eececfb 100644
+--- a/src/pages/Work.jsx
++++ b/src/pages/Work.jsx
+@@ -1,99 +1,45 @@
+ import React, { useEffect, useState, useRef } from "react";
+-import { createClient } from "@sanity/client";
+-import { Link } from "react-router-dom"; // Import Link for navigation
++import { Link } from "react-router-dom";
+ import "../styles/Work.css";
+-import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
+-import imageUrlBuilder from "@sanity/image-url";
+-import "lazysizes";
+-
+-// Initialize Sanity client
+-const sanityClient = createClient({
+-	projectId: SANITY_PROJECT_ID,
+-	dataset: SANITY_DATASET_NAME,
+-	apiVersion: "2023-01-01", // Use the latest API version
+-	useCdn: true, // Use the CDN for faster response times
+-});
+-
+-// Initialize the image URL builder
+-const builder = imageUrlBuilder(sanityClient);
+-
+-function urlFor(source) {
+-	return builder.image(source);
+-}
+-
+-// Helper function to get responsive thumbnail width
+-const getThumbnailWidth = () => {
+-	const width = window.innerWidth;
+-	const pixelRatio = window.devicePixelRatio || 1;
+-
+-	// Account for device pixel ratio and padding
+-	const availableWidth = width - 32; // Subtract padding (1rem = 16px * 2)
+-
+-	if (width < 768) {
+-		// Mobile: use higher resolution for retina displays
+-		return Math.min(Math.ceil(availableWidth * pixelRatio * 1.2), 800); // Max 800px
+-	}
+-	if (width < 1200) {
+-		// Tablet: 2 columns
+-		const columnWidth = (availableWidth - 64) / 2; // Subtract gap
+-		return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1000); // Max 1000px
+-	}
+-	// Desktop: 3 columns
+-	const columnWidth = (availableWidth - 128) / 3; // Subtract gaps
+-	return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1200); // Max 1200px
+-};
++import { sanityClient, urlFor } from "../sanity";
+ 
+ const ProjectCard = ({ item }) => {
+ 	const containerRef = useRef(null);
+ 	const videoRef = useRef(null);
+-	const [videoSrc, setVideoSrc] = useState(null);
+-	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
++	const [videoLoaded, setVideoLoaded] = useState(false);
++	const [imgLoaded, setImgLoaded] = useState(false);
+ 	const [supportsHover, setSupportsHover] = useState(true);
++	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
++
++	// Detect hover capability once on mount
++	useEffect(() => {
++		const mq = window.matchMedia("(hover: hover)");
++		setSupportsHover(mq.matches);
++		const handler = (e) => setSupportsHover(e.matches);
++		mq.addEventListener("change", handler);
++		return () => mq.removeEventListener("change", handler);
++	}, []);
+ 
+-	// Lazy load video when element enters viewport
++	// Lazy-load video src via IntersectionObserver — only when near viewport
+ 	useEffect(() => {
++		if (!item.videoUrl) return;
+ 		const observer = new IntersectionObserver(
+ 			([entry]) => {
+ 				if (entry.isIntersecting) {
+-					// Load video source only when in viewport
+-					setVideoSrc(item.videoUrl);
+-					observer.unobserve(entry.target);
++					setVideoLoaded(true);
++					observer.disconnect();
+ 				}
+ 			},
+-			{ rootMargin: "50px" }, // Start loading 50px before entering viewport
++			{ rootMargin: "200px" },
+ 		);
+-
+-		if (containerRef.current) {
+-			observer.observe(containerRef.current);
+-		}
+-
+-		return () => {
+-			if (containerRef.current) {
+-				observer.unobserve(containerRef.current);
+-			}
+-		};
++		if (containerRef.current) observer.observe(containerRef.current);
++		return () => observer.disconnect();
+ 	}, [item.videoUrl]);
+ 
+-	// Detect if device supports hover (cursor/trackpad)
+-	useEffect(() => {
+-		// Check if device has hover capability using media query
+-		const mediaQuery = window.matchMedia("(hover: hover)");
+-		setSupportsHover(mediaQuery.matches);
+-
+-		const handleChange = (e) => {
+-			setSupportsHover(e.matches);
+-		};
+-
+-		mediaQuery.addEventListener("change", handleChange);
+-		return () => mediaQuery.removeEventListener("change", handleChange);
+-	}, []);
+-
+ 	const handleMouseEnter = () => {
+ 		if (supportsHover && videoRef.current) {
+ 			videoRef.current.currentTime = 0;
+-			videoRef.current.play().catch(() => {
+-				// Silently handle play failures (browsers may block autoplay)
+-			});
++			videoRef.current.play().catch(() => {});
+ 		}
+ 	};
+ 
+@@ -104,21 +50,28 @@ const ProjectCard = ({ item }) => {
+ 	};
+ 
+ 	const handleTouchStart = () => {
+-		// Only use touch if hover is not supported
+ 		if (!supportsHover && videoRef.current) {
+ 			if (isTouchPlaying) {
+ 				videoRef.current.pause();
+ 				setIsTouchPlaying(false);
+ 			} else {
+ 				videoRef.current.currentTime = 0;
+-				videoRef.current.play().catch(() => {
+-					// Silently handle play failures (browsers may block autoplay)
+-				});
++				videoRef.current.play().catch(() => {});
+ 				setIsTouchPlaying(true);
+ 			}
+ 		}
+ 	};
+ 
++	// Responsive srcSet: serve the right resolution for the column width
++	const thumbBase = urlFor(item.thumbnail).fit("crop").auto("format");
++	const thumbSrcSet = [
++		`${thumbBase.width(400).url()} 400w`,
++		`${thumbBase.width(700).url()} 700w`,
++		`${thumbBase.width(1000).url()} 1000w`,
++	].join(", ");
++	// Sizes: mobile=100vw, tablet=50vw, desktop=33vw (matching grid breakpoints)
++	const thumbSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
++
+ 	return (
+ 		<Link
+ 			to={`/project/${item.projectId}`}
+@@ -129,21 +82,23 @@ const ProjectCard = ({ item }) => {
+ 			onTouchStart={handleTouchStart}
+ 			ref={containerRef}
+ 		>
+-			<div className="media-wrapper">
++			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>
+ 				<img
+-					src={urlFor(item.thumbnail).width(getThumbnailWidth()).url()}
+-					data-src={urlFor(item.thumbnail).width(getThumbnailWidth()).url()}
++					src={thumbBase.width(700).url()}
++					srcSet={thumbSrcSet}
++					sizes={thumbSizes}
+ 					alt={item.title}
+-					className="thumbnail lazyload"
++					className="thumbnail"
+ 					loading="lazy"
+-					onLoad={(e) => e.target.parentElement.classList.add("loaded")}
++					decoding="async"
++					onLoad={() => setImgLoaded(true)}
+ 				/>
+ 				<div className="preview-container">
+ 					<div className="preview-title">{item.title}</div>
+-					{videoSrc && (
++					{videoLoaded && item.videoUrl && (
+ 						<video
+ 							ref={videoRef}
+-							src={videoSrc}
++							src={item.videoUrl}
+ 							className="video-preview"
+ 							muted
+ 							loop
+@@ -160,8 +115,9 @@ const ProjectCard = ({ item }) => {
+ 
+ export default function Work() {
+ 	const [projects, setProjects] = useState([]);
++	const [loading, setLoading] = useState(true);
++	const [error, setError] = useState(false);
+ 
+-	// Fetch data from Sanity
+ 	useEffect(() => {
+ 		sanityClient
+ 			.fetch(
+@@ -172,17 +128,29 @@ export default function Work() {
+ 					thumbnail
+ 				}`,
+ 			)
+-			.then((data) => setProjects(data))
+-			.catch((error) => console.error("Error fetching data:", error));
++			.then((data) => {
++				setProjects(data);
++				setLoading(false);
++			})
++			.catch(() => {
++				setError(true);
++				setLoading(false);
++			});
+ 	}, []);
+ 
+-	console.log("Fetched projects:", projects);
++	if (error) return <div className="grid-error">Unable to load projects.</div>;
+ 
+ 	return (
+ 		<div className="grid-container">
+-			{projects.map((item) => (
+-				<ProjectCard key={item.projectId} item={item} />
+-			))}
++			{loading
++				? [...Array(6)].map((_, i) => (
++						<div key={i} className="grid-item">
++							<div className="media-wrapper skeleton" />
++						</div>
++					))
++				: projects.map((item) => (
++						<ProjectCard key={item.projectId} item={item} />
++					))}
+ 		</div>
+ 	);
+ }
+diff --git a/src/sanity.js b/src/sanity.js
+index 50ca683..42b7b85 100644
+--- a/src/sanity.js
++++ b/src/sanity.js
+@@ -1,8 +1,15 @@
+-import sanityClient from "@sanity/client";
+-import { SANITY_PROJECT_ID } from "./Constants";
++import { createClient } from "@sanity/client";
++import imageUrlBuilder from "@sanity/image-url";
+ 
+-export default sanityClient({
+-	projectId: SANITY_PROJECT_ID, // Replace with your actual Sanity project ID
+-	dataset: "production",
++export const sanityClient = createClient({
++	projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
++	dataset: import.meta.env.VITE_SANITY_DATASET || "production",
++	apiVersion: import.meta.env.VITE_SANITY_API_VERSION || "2023-01-01",
+ 	useCdn: true,
+ });
++
++const builder = imageUrlBuilder(sanityClient);
++
++export function urlFor(source) {
++	return builder.image(source);
++}
+diff --git a/src/styles/ProjectDetails.css b/src/styles/ProjectDetails.css
+index 5bd56c0..f66c13b 100644
+--- a/src/styles/ProjectDetails.css
++++ b/src/styles/ProjectDetails.css
+@@ -70,12 +70,7 @@
+ 	width: 100%;
+ 	height: auto;
+ 	border: none;
+-	opacity: 0;
+-	transition: opacity 0.5s ease-in-out;
+-}
+-
+-.project-still.lazyloaded {
+-	opacity: 1;
++	display: block;
+ }
+ 
+ @media (max-width: 768px) {
+@@ -90,14 +85,4 @@
+ 	}
+ }
+ 
+-/* Fade-in animation */
+-@keyframes fadeIn {
+-	from {
+-		opacity: 0;
+-		transform: translateY(20px); /* Optional: slight upward motion */
+-	}
+-	to {
+-		opacity: 1;
+-		transform: translateY(0);
+-	}
+-}
++
+diff --git a/src/styles/Work.css b/src/styles/Work.css
+index 4f2311b..9cde517 100644
+--- a/src/styles/Work.css
++++ b/src/styles/Work.css
+@@ -74,12 +74,28 @@
+ 	transition: opacity 0.5s ease-in-out;
+ }
+ 
+-.thumbnail.lazyloaded {
++.media-wrapper.loaded .thumbnail {
+ 	opacity: 1;
+ }
+ 
+-.media-wrapper.loaded .thumbnail {
+-	opacity: 1;
++/* Skeleton loading state */
++.media-wrapper.skeleton {
++	background: #e8e8e8;
++	animation: skeleton-pulse 1.4s ease-in-out infinite;
++}
++
++@keyframes skeleton-pulse {
++	0%, 100% { opacity: 0.5; }
++	50% { opacity: 1; }
++}
++
++/* Fetch error */
++.grid-error {
++	grid-column: 1 / -1;
++	text-align: center;
++	padding: 4rem;
++	color: #888;
++	font-size: 0.95rem;
+ }
+ 
+ .grid-item:hover .thumbnail {

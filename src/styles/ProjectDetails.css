@@ -70,12 +70,7 @@
 	width: 100%;
 	height: auto;
 	border: none;
-	opacity: 0;
-	transition: opacity 0.5s ease-in-out;
-}
-
-.project-still.lazyloaded {
-	opacity: 1;
+	display: block;
 }
 
 @media (max-width: 768px) {
@@ -90,14 +85,4 @@
 	}
 }
 
-/* Fade-in animation */
-@keyframes fadeIn {
-	from {
-		opacity: 0;
-		transform: translateY(20px); /* Optional: slight upward motion */
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
+

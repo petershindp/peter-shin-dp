@@ -1,21 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { motion } from "framer-motion";
 import "../styles/About.css";
-import { SANITY_PROJECT_ID, SANITY_DATASET_NAME } from "../Constants";
+import { sanityClient, urlFor } from "../sanity";
 import { FaInstagram } from "react-icons/fa";
-
-const sanityClient = createClient({
-	projectId: SANITY_PROJECT_ID,
-	dataset: SANITY_DATASET_NAME,
-	apiVersion: "2023-01-01",
-	useCdn: true,
-});
-const builder = imageUrlBuilder(sanityClient);
-function urlFor(source) {
-	return builder.image(source);
-}
 
 export default function About() {
 	const [about, setAbout] = useState(null);
@@ -43,13 +31,16 @@ export default function About() {
 						transition={{ delay: 0.2, duration: 0.7, ease: "easeOut" }}
 					>
 						<img
-							src={urlFor(about.photo)
-								.width(800)
-								.height(1000)
-								.fit("crop")
-								.url()}
+							src={urlFor(about.photo).width(800).height(1000).fit("crop").auto("format").url()}
+							srcSet={[
+								`${urlFor(about.photo).width(420).height(520).fit("crop").auto("format").url()} 420w`,
+								`${urlFor(about.photo).width(800).height(1000).fit("crop").auto("format").url()} 800w`,
+							].join(", ")}
+							sizes="(max-width: 900px) 180px, 420px"
 							alt="Peter Shin"
 							className="about-photo"
+							loading="eager"
+							decoding="async"
 						/>
 					</motion.div>
 					<motion.div
@@ -62,10 +53,8 @@ export default function About() {
 						<p className="about-text">{about.bio}</p>
 						<div className="about-links">
 							<a
-								href="mailto:petershin.dp@gmail.com"
+								href="mailto:ssm.peter.shin@gmail.com"
 								className="about-link"
-								target="_blank"
-								rel="noopener noreferrer"
 								onClick={() =>
 									window.umami && window.umami.track("Email Link Clicked")
 								}

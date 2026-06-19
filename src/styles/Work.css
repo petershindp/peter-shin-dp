@@ -74,12 +74,28 @@
 	transition: opacity 0.5s ease-in-out;
 }
 
-.thumbnail.lazyloaded {
+.media-wrapper.loaded .thumbnail {
 	opacity: 1;
 }
 
-.media-wrapper.loaded .thumbnail {
-	opacity: 1;
+/* Skeleton loading state */
+.media-wrapper.skeleton {
+	background: #e8e8e8;
+	animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+	0%, 100% { opacity: 0.5; }
+	50% { opacity: 1; }
+}
+
+/* Fetch error */
+.grid-error {
+	grid-column: 1 / -1;
+	text-align: center;
+	padding: 4rem;
+	color: #888;
+	font-size: 0.95rem;
 }
 
 .grid-item:hover .thumbnail {

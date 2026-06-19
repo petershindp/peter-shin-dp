@@ -1,99 +1,45 @@
 import React, { useEffect, useState, useRef } from "react";
-import { createClient } from "@sanity/client";
-import { Link } from "react-router-dom"; // Import Link for navigation
+import { Link } from "react-router-dom";
 import "../styles/Work.css";
-import { SANITY_DATASET_NAME, SANITY_PROJECT_ID } from "../Constants";
-import imageUrlBuilder from "@sanity/image-url";
-import "lazysizes";
-
-// Initialize Sanity client
-const sanityClient = createClient({
-	projectId: SANITY_PROJECT_ID,
-	dataset: SANITY_DATASET_NAME,
-	apiVersion: "2023-01-01", // Use the latest API version
-	useCdn: true, // Use the CDN for faster response times
-});
-
-// Initialize the image URL builder
-const builder = imageUrlBuilder(sanityClient);
-
-function urlFor(source) {
-	return builder.image(source);
-}
-
-// Helper function to get responsive thumbnail width
-const getThumbnailWidth = () => {
-	const width = window.innerWidth;
-	const pixelRatio = window.devicePixelRatio || 1;
-
-	// Account for device pixel ratio and padding
-	const availableWidth = width - 32; // Subtract padding (1rem = 16px * 2)
-
-	if (width < 768) {
-		// Mobile: use higher resolution for retina displays
-		return Math.min(Math.ceil(availableWidth * pixelRatio * 1.2), 800); // Max 800px
-	}
-	if (width < 1200) {
-		// Tablet: 2 columns
-		const columnWidth = (availableWidth - 64) / 2; // Subtract gap
-		return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1000); // Max 1000px
-	}
-	// Desktop: 3 columns
-	const columnWidth = (availableWidth - 128) / 3; // Subtract gaps
-	return Math.min(Math.ceil(columnWidth * pixelRatio * 1.2), 1200); // Max 1200px
-};
+import { sanityClient, urlFor } from "../sanity";
 
 const ProjectCard = ({ item }) => {
 	const containerRef = useRef(null);
 	const videoRef = useRef(null);
-	const [videoSrc, setVideoSrc] = useState(null);
-	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
+	const [videoLoaded, setVideoLoaded] = useState(false);
+	const [imgLoaded, setImgLoaded] = useState(false);
 	const [supportsHover, setSupportsHover] = useState(true);
+	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
 
-	// Lazy load video when element enters viewport
+	// Detect hover capability once on mount
 	useEffect(() => {
+		const mq = window.matchMedia("(hover: hover)");
+		setSupportsHover(mq.matches);
+		const handler = (e) => setSupportsHover(e.matches);
+		mq.addEventListener("change", handler);
+		return () => mq.removeEventListener("change", handler);
+	}, []);
+
+	// Lazy-load video src via IntersectionObserver — only when near viewport
+	useEffect(() => {
+		if (!item.videoUrl) return;
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting) {
-					// Load video source only when in viewport
-					setVideoSrc(item.videoUrl);
-					observer.unobserve(entry.target);
+					setVideoLoaded(true);
+					observer.disconnect();
 				}
 			},
-			{ rootMargin: "50px" }, // Start loading 50px before entering viewport
+			{ rootMargin: "200px" },
 		);
-
-		if (containerRef.current) {
-			observer.observe(containerRef.current);
-		}
-
-		return () => {
-			if (containerRef.current) {
-				observer.unobserve(containerRef.current);
-			}
-		};
+		if (containerRef.current) observer.observe(containerRef.current);
+		return () => observer.disconnect();
 	}, [item.videoUrl]);
-
-	// Detect if device supports hover (cursor/trackpad)
-	useEffect(() => {
-		// Check if device has hover capability using media query
-		const mediaQuery = window.matchMedia("(hover: hover)");
-		setSupportsHover(mediaQuery.matches);
-
-		const handleChange = (e) => {
-			setSupportsHover(e.matches);
-		};
-
-		mediaQuery.addEventListener("change", handleChange);
-		return () => mediaQuery.removeEventListener("change", handleChange);
-	}, []);
 
 	const handleMouseEnter = () => {
 		if (supportsHover && videoRef.current) {
 			videoRef.current.currentTime = 0;
-			videoRef.current.play().catch(() => {
-				// Silently handle play failures (browsers may block autoplay)
-			});
+			videoRef.current.play().catch(() => {});
 		}
 	};
 
@@ -104,20 +50,27 @@ const ProjectCard = ({ item }) => {
 	};
 
 	const handleTouchStart = () => {
-		// Only use touch if hover is not supported
 		if (!supportsHover && videoRef.current) {
 			if (isTouchPlaying) {
 				videoRef.current.pause();
 				setIsTouchPlaying(false);
 			} else {
 				videoRef.current.currentTime = 0;
-				videoRef.current.play().catch(() => {
-					// Silently handle play failures (browsers may block autoplay)
-				});
+				videoRef.current.play().catch(() => {});
 				setIsTouchPlaying(true);
 			}
 		}
 	};
+
+	// Responsive srcSet: serve the right resolution for the column width
+	const thumbBase = urlFor(item.thumbnail).fit("crop").auto("format");
+	const thumbSrcSet = [
+		`${thumbBase.width(400).url()} 400w`,
+		`${thumbBase.width(700).url()} 700w`,
+		`${thumbBase.width(1000).url()} 1000w`,
+	].join(", ");
+	// Sizes: mobile=100vw, tablet=50vw, desktop=33vw (matching grid breakpoints)
+	const thumbSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
 
 	return (
 		<Link
@@ -129,21 +82,23 @@ const ProjectCard = ({ item }) => {
 			onTouchStart={handleTouchStart}
 			ref={containerRef}
 		>
-			<div className="media-wrapper">
+			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>
 				<img
-					src={urlFor(item.thumbnail).width(getThumbnailWidth()).url()}
-					data-src={urlFor(item.thumbnail).width(getThumbnailWidth()).url()}
+					src={thumbBase.width(700).url()}
+					srcSet={thumbSrcSet}
+					sizes={thumbSizes}
 					alt={item.title}
-					className="thumbnail lazyload"
+					className="thumbnail"
 					loading="lazy"
-					onLoad={(e) => e.target.parentElement.classList.add("loaded")}
+					decoding="async"
+					onLoad={() => setImgLoaded(true)}
 				/>
 				<div className="preview-container">
 					<div className="preview-title">{item.title}</div>
-					{videoSrc && (
+					{videoLoaded && item.videoUrl && (
 						<video
 							ref={videoRef}
-							src={videoSrc}
+							src={item.videoUrl}
 							className="video-preview"
 							muted
 							loop
@@ -160,8 +115,9 @@ const ProjectCard = ({ item }) => {
 
 export default function Work() {
 	const [projects, setProjects] = useState([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
 
-	// Fetch data from Sanity
 	useEffect(() => {
 		sanityClient
 			.fetch(
@@ -172,17 +128,29 @@ export default function Work() {
 					thumbnail
 				}`,
 			)
-			.then((data) => setProjects(data))
-			.catch((error) => console.error("Error fetching data:", error));
+			.then((data) => {
+				setProjects(data);
+				setLoading(false);
+			})
+			.catch(() => {
+				setError(true);
+				setLoading(false);
+			});
 	}, []);
 
-	console.log("Fetched projects:", projects);
+	if (error) return <div className="grid-error">Unable to load projects.</div>;
 
 	return (
 		<div className="grid-container">
-			{projects.map((item) => (
-				<ProjectCard key={item.projectId} item={item} />
-			))}
+			{loading
+				? [...Array(6)].map((_, i) => (
+						<div key={i} className="grid-item">
+							<div className="media-wrapper skeleton" />
+						</div>
+					))
+				: projects.map((item) => (
+						<ProjectCard key={item.projectId} item={item} />
+					))}
 		</div>
 	);
 }

@@ -8,24 +8,20 @@ const ProjectCard = ({ item }) => {
 	const videoRef = useRef(null);
 	const [videoLoaded, setVideoLoaded] = useState(false);
 	const [imgLoaded, setImgLoaded] = useState(false);
-	const [supportsHover, setSupportsHover] = useState(true);
-	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
-	const [pendingPlay, setPendingPlay] = useState(false);
-	const touchStartTimeRef = useRef(0);
-	const tapDurationRef = useRef(0);
+	const [supportsHover, setSupportsHover] = useState(
+		() => window.matchMedia("(hover: hover)").matches,
+	);
 
-	// Detect hover capability once on mount
 	useEffect(() => {
 		const mq = window.matchMedia("(hover: hover)");
-		setSupportsHover(mq.matches);
 		const handler = (e) => setSupportsHover(e.matches);
 		mq.addEventListener("change", handler);
 		return () => mq.removeEventListener("change", handler);
 	}, []);
 
-	// Lazy-load video src via IntersectionObserver — only when near viewport
+	// Only lazy-load video on devices that support hover
 	useEffect(() => {
-		if (!item.videoUrl) return;
+		if (!item.videoUrl || !supportsHover) return;
 		const observer = new IntersectionObserver(
 			([entry]) => {
 				if (entry.isIntersecting) {
@@ -37,16 +33,7 @@ const ProjectCard = ({ item }) => {
 		);
 		if (containerRef.current) observer.observe(containerRef.current);
 		return () => observer.disconnect();
-	}, [item.videoUrl]);
-
-	// Play video after it's rendered into the DOM when a touch triggered load
-	useEffect(() => {
-		if (pendingPlay && videoRef.current) {
-			videoRef.current.currentTime = 0;
-			videoRef.current.play().catch(() => {});
-			setPendingPlay(false);
-		}
-	}, [pendingPlay, videoLoaded]);
+	}, [item.videoUrl, supportsHover]);
 
 	const handleMouseEnter = () => {
 		if (supportsHover && videoRef.current) {
@@ -61,58 +48,21 @@ const ProjectCard = ({ item }) => {
 		}
 	};
 
-	const handleTouchStart = () => {
-		if (!supportsHover && item.videoUrl) {
-			touchStartTimeRef.current = Date.now();
-			setIsTouchPlaying(true);
-			if (videoLoaded && videoRef.current) {
-				videoRef.current.currentTime = 0;
-				videoRef.current.play().catch(() => {});
-			} else {
-				setVideoLoaded(true);
-				setPendingPlay(true);
-			}
-		}
-	};
-
-	const handleTouchEnd = () => {
-		if (!supportsHover) {
-			tapDurationRef.current = Date.now() - touchStartTimeRef.current;
-			if (videoRef.current) videoRef.current.pause();
-			setPendingPlay(false);
-			setIsTouchPlaying(false);
-		}
-	};
-
-	// Allow tap (short touch) to navigate; block navigation after a long press preview
-	const handleClick = (e) => {
-		if (!supportsHover && item.videoUrl && tapDurationRef.current > 300) {
-			e.preventDefault();
-		}
-		tapDurationRef.current = 0;
-	};
-
-	// Responsive srcSet: serve the right resolution for the column width
 	const thumbBase = urlFor(item.thumbnail).fit("crop").auto("format");
 	const thumbSrcSet = [
 		`${thumbBase.width(400).url()} 400w`,
 		`${thumbBase.width(700).url()} 700w`,
 		`${thumbBase.width(1000).url()} 1000w`,
 	].join(", ");
-	// Sizes: mobile=100vw, tablet=50vw, desktop=33vw (matching grid breakpoints)
 	const thumbSizes = "(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw";
 
 	return (
 		<Link
 			to={`/project/${item.projectId}`}
-			className={`grid-item${isTouchPlaying ? " touch-playing" : ""}`}
+			className="grid-item"
 			tabIndex="0"
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
-			onTouchStart={handleTouchStart}
-			onTouchEnd={handleTouchEnd}
-			onTouchCancel={handleTouchEnd}
-			onClick={handleClick}
 			ref={containerRef}
 		>
 			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>
@@ -127,8 +77,13 @@ const ProjectCard = ({ item }) => {
 					onLoad={() => setImgLoaded(true)}
 				/>
 				<div className="preview-container">
-					<div className="preview-title">{item.title}</div>
-					{videoLoaded && item.videoUrl && (
+					<div className="preview-info">
+						<div className="preview-title">{item.title}</div>
+						{item.projectType && (
+							<div className="preview-type">{item.projectType}</div>
+						)}
+					</div>
+					{supportsHover && videoLoaded && item.videoUrl && (
 						<video
 							ref={videoRef}
 							src={item.videoUrl}
@@ -157,6 +112,7 @@ export default function Work() {
 				`*[_type == "project" && !hide] | order(order asc){
 					projectId,
 					title,
+					projectType,
 					"videoUrl": videoFile.asset->url,
 					thumbnail
 				}`,

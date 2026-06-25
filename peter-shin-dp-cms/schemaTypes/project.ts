@@ -20,6 +20,21 @@ export default defineType({
       type: 'string',
     }),
     defineField({
+      name: 'projectType',
+      title: 'Project Type',
+      type: 'string',
+      options: {
+        list: [
+          {title: 'Commercial', value: 'Commercial'},
+          {title: 'Music Video', value: 'Music Video'},
+          {title: 'Short Film', value: 'Short Film'},
+          {title: 'Documentary', value: 'Documentary'},
+          {title: 'Brand Film', value: 'Brand Film'},
+          {title: 'Social Content', value: 'Social Content'},
+        ],
+      },
+    }),
+    defineField({
       name: 'description',
       title: 'Description',
       type: 'string',

@@ -79,7 +79,7 @@
 
 .video-preview {
 	z-index: 1; /* video sits below the thumbnail by default */
-	opacity: 1;  /* always rendered — z-index controls visibility */
+	opacity: 1; /* always rendered — z-index controls visibility */
 }
 
 /* Skeleton loading state */
@@ -107,16 +107,14 @@
 	font-size: 0.95rem;
 }
 
-/* On hover/touch: push thumbnail behind the video */
-.grid-item:hover .thumbnail,
-.grid-item.touch-playing .thumbnail {
+/* On hover: push thumbnail behind the video */
+.grid-item:hover .thumbnail {
 	opacity: 0;
 	z-index: 1;
 }
 
-/* Bring video on top when active */
-.grid-item:hover .video-preview,
-.grid-item.touch-playing .video-preview {
+/* Bring video on top when hovered */
+.grid-item:hover .video-preview {
 	z-index: 2;
 }
 
@@ -129,26 +127,70 @@
 	align-items: center;
 }
 
-.preview-title {
-	position: absolute; /* Position the title absolutely within the container */
-	opacity: 0;
+.preview-info {
+	position: absolute;
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -50%); /* Center the title */
-	color: white; /* Ensure the text is visible over the video */
+	transform: translate(-50%, -50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0rem;
+	opacity: 0;
+	z-index: 3;
+	pointer-events: none;
+	width: 90%;
+}
+
+.grid-item:hover .preview-info,
+.grid-item:focus .preview-info {
+	opacity: 1;
+}
+
+.preview-title {
+	color: white;
 	font-size: 1rem;
 	font-weight: bold;
-	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for better visibility */
+	text-shadow: 0 2px 4px rgba(0, 0, 0, 0.7);
 	text-transform: uppercase;
 	letter-spacing: 3px;
 	text-align: center;
-	z-index: 3; /* above both thumbnail and video */
-	pointer-events: none; /* Prevent the title from interfering with mouse events */
 }
-.grid-item:hover .preview-title,
-.grid-item:focus .preview-title,
-.grid-item.touch-playing .preview-title {
-	opacity: 1;
+
+.preview-type {
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 0.65rem;
+	font-weight: 400;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+	text-align: center;
+}
+
+/* Mobile: info block always visible at bottom-left */
+@media (hover: none) {
+	.preview-info {
+		opacity: 1;
+		top: auto;
+		bottom: 0.75rem;
+		left: 0.75rem;
+		right: auto;
+		transform: none;
+		align-items: flex-start;
+		width: auto;
+	}
+
+	.preview-title {
+		font-size: 0.75rem;
+		letter-spacing: 1.5px;
+		text-align: left;
+	}
+
+	.preview-type {
+		font-size: 0.6rem;
+		letter-spacing: 1.5px;
+		text-align: left;
+	}
 }
 
 .grid-item:focus {

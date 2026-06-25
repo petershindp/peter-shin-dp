@@ -36,6 +36,10 @@
 	width: 100%;
 	aspect-ratio: 16 / 9;
 	height: auto;
+	-webkit-touch-callout: none;
+	-webkit-tap-highlight-color: transparent;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .media-wrapper {
@@ -107,15 +111,16 @@
 	font-size: 0.95rem;
 }
 
-/* On hover: push thumbnail behind the video */
-.grid-item:hover .thumbnail {
-	opacity: 0;
-	z-index: 1;
-}
+/* Hover effects only on devices with a real pointer — prevents iOS touch from triggering these */
+@media (hover: hover) {
+	.grid-item:hover .thumbnail {
+		opacity: 0;
+		z-index: 1;
+	}
 
-/* Bring video on top when hovered */
-.grid-item:hover .video-preview {
-	z-index: 2;
+	.grid-item:hover .video-preview {
+		z-index: 2;
+	}
 }
 
 .preview-container {
@@ -142,9 +147,11 @@
 	width: 90%;
 }
 
-.grid-item:hover .preview-info,
-.grid-item:focus .preview-info {
-	opacity: 1;
+@media (hover: hover) {
+	.grid-item:hover .preview-info,
+	.grid-item:focus .preview-info {
+		opacity: 1;
+	}
 }
 
 .preview-title {

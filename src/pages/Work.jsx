@@ -10,6 +10,9 @@ const ProjectCard = ({ item }) => {
 	const [imgLoaded, setImgLoaded] = useState(false);
 	const [supportsHover, setSupportsHover] = useState(true);
 	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
+	const [pendingPlay, setPendingPlay] = useState(false);
+	// Tracks whether the next click event was preceded by a touchstart that started the preview
+	const touchJustStartedRef = useRef(false);
 
 	// Detect hover capability once on mount
 	useEffect(() => {
@@ -36,6 +39,15 @@ const ProjectCard = ({ item }) => {
 		return () => observer.disconnect();
 	}, [item.videoUrl]);
 
+	// Play video after it's rendered into the DOM when a touch triggered load
+	useEffect(() => {
+		if (pendingPlay && videoRef.current) {
+			videoRef.current.currentTime = 0;
+			videoRef.current.play().catch(() => {});
+			setPendingPlay(false);
+		}
+	}, [pendingPlay, videoLoaded]);
+
 	const handleMouseEnter = () => {
 		if (supportsHover && videoRef.current) {
 			videoRef.current.currentTime = 0;
@@ -50,15 +62,27 @@ const ProjectCard = ({ item }) => {
 	};
 
 	const handleTouchStart = () => {
-		if (!supportsHover && videoRef.current) {
-			if (isTouchPlaying) {
-				videoRef.current.pause();
-				setIsTouchPlaying(false);
-			} else {
+		if (!supportsHover && item.videoUrl && !isTouchPlaying) {
+			touchJustStartedRef.current = true;
+			setIsTouchPlaying(true);
+			if (videoLoaded && videoRef.current) {
 				videoRef.current.currentTime = 0;
 				videoRef.current.play().catch(() => {});
-				setIsTouchPlaying(true);
+			} else {
+				// Video element not in DOM yet — trigger load and play via effect
+				setVideoLoaded(true);
+				setPendingPlay(true);
 			}
+		}
+		// If isTouchPlaying is already true, the next click will navigate normally
+	};
+
+	// Blocks navigation on the first tap so the preview can be seen;
+	// the second tap lets the click through to the project page
+	const handleClick = (e) => {
+		if (!supportsHover && item.videoUrl && touchJustStartedRef.current) {
+			e.preventDefault();
+			touchJustStartedRef.current = false;
 		}
 	};
 
@@ -75,11 +99,12 @@ const ProjectCard = ({ item }) => {
 	return (
 		<Link
 			to={`/project/${item.projectId}`}
-			className="grid-item"
+			className={`grid-item${isTouchPlaying ? " touch-playing" : ""}`}
 			tabIndex="0"
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			onTouchStart={handleTouchStart}
+			onClick={handleClick}
 			ref={containerRef}
 		>
 			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>

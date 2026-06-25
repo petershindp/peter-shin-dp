@@ -3,11 +3,11 @@
 	display: grid;
 	grid-template-columns: 1fr;
 	grid-template-rows: auto;
-	gap: 2rem;
-	padding-top: 2rem;
-	padding-bottom: 2rem;
-	padding-left: 1rem;
-	padding-right: 1rem;
+	gap: 0.1rem;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
 	width: 100%;
 	opacity: 0; /* Start hidden */
 	animation: fadeIn 1s ease-in-out forwards; /* Fade-in animation */
@@ -15,15 +15,15 @@
 @media (min-width: 768px) {
 	.grid-container {
 		grid-template-columns: repeat(2, 1fr);
-		padding-left: 5rem;
-		padding-right: 5rem;
+		padding-left: 2rem;
+		padding-right: 2rem;
 	}
 }
 @media (min-width: 1200px) {
 	.grid-container {
 		grid-template-columns: repeat(3, 1fr);
-		padding-left: 120px;
-		padding-right: 120px;
+		padding-left: 3rem;
+		padding-right: 3rem;
 	}
 }
 
@@ -85,8 +85,13 @@
 }
 
 @keyframes skeleton-pulse {
-	0%, 100% { opacity: 0.5; }
-	50% { opacity: 1; }
+	0%,
+	100% {
+		opacity: 0.5;
+	}
+	50% {
+		opacity: 1;
+	}
 }
 
 /* Fetch error */
@@ -98,7 +103,8 @@
 	font-size: 0.95rem;
 }
 
-.grid-item:hover .thumbnail {
+.grid-item:hover .thumbnail,
+.grid-item.touch-playing .thumbnail {
 	opacity: 0;
 }
 
@@ -106,7 +112,8 @@
 	opacity: 0;
 }
 
-.grid-item:hover .video-preview {
+.grid-item:hover .video-preview,
+.grid-item.touch-playing .video-preview {
 	opacity: 1;
 }
 
@@ -136,8 +143,9 @@
 	pointer-events: none; /* Prevent the title from interfering with mouse events */
 }
 .grid-item:hover .preview-title,
-.grid-item:focus .preview-title {
-	opacity: 1; /* Show the title on hover or focus */
+.grid-item:focus .preview-title,
+.grid-item.touch-playing .preview-title {
+	opacity: 1;
 }
 
 .grid-item:focus {

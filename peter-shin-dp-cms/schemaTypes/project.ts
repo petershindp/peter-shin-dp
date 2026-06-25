@@ -46,10 +46,17 @@ export default defineType({
       },
     }),
     defineField({
+      name: 'clips',
+      title: 'Clips',
+      type: 'array',
+      of: [{type: 'file', options: {accept: 'video/*'}}],
+      description: 'Short video clips shown in the project carousel',
+    }),
+    defineField({
       name: 'stills',
       title: 'Stills',
       type: 'array',
-      of: [{type: 'image'}], // Array of images
+      of: [{type: 'image'}],
     }),
     defineField({
       name: 'order',

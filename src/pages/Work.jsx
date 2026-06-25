@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "../styles/Work.css";
 import { sanityClient, urlFor } from "../sanity";
 
 const ProjectCard = ({ item }) => {
-	const navigate = useNavigate();
 	const containerRef = useRef(null);
 	const videoRef = useRef(null);
 	const [videoLoaded, setVideoLoaded] = useState(false);
@@ -13,7 +12,7 @@ const ProjectCard = ({ item }) => {
 	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
 	const [pendingPlay, setPendingPlay] = useState(false);
 	const touchStartTimeRef = useRef(0);
-	const touchStartPosRef = useRef({ x: 0, y: 0 });
+	const tapDurationRef = useRef(0);
 
 	// Detect hover capability once on mount
 	useEffect(() => {
@@ -62,12 +61,9 @@ const ProjectCard = ({ item }) => {
 		}
 	};
 
-	const handleTouchStart = (e) => {
+	const handleTouchStart = () => {
 		if (!supportsHover && item.videoUrl) {
-			e.preventDefault(); // block the synthetic click so we control navigation
-			const t = e.touches[0];
 			touchStartTimeRef.current = Date.now();
-			touchStartPosRef.current = { x: t.clientX, y: t.clientY };
 			setIsTouchPlaying(true);
 			if (videoLoaded && videoRef.current) {
 				videoRef.current.currentTime = 0;
@@ -79,21 +75,21 @@ const ProjectCard = ({ item }) => {
 		}
 	};
 
-	const handleTouchEnd = (e) => {
+	const handleTouchEnd = () => {
 		if (!supportsHover) {
+			tapDurationRef.current = Date.now() - touchStartTimeRef.current;
 			if (videoRef.current) videoRef.current.pause();
 			setPendingPlay(false);
 			setIsTouchPlaying(false);
-
-			// Navigate if it was a quick tap with minimal movement
-			const elapsed = Date.now() - touchStartTimeRef.current;
-			const t = e.changedTouches[0];
-			const dx = Math.abs(t.clientX - touchStartPosRef.current.x);
-			const dy = Math.abs(t.clientY - touchStartPosRef.current.y);
-			if (elapsed < 300 && dx < 10 && dy < 10) {
-				navigate(`/project/${item.projectId}`);
-			}
 		}
+	};
+
+	// Allow tap (short touch) to navigate; block navigation after a long press preview
+	const handleClick = (e) => {
+		if (!supportsHover && item.videoUrl && tapDurationRef.current > 300) {
+			e.preventDefault();
+		}
+		tapDurationRef.current = 0;
 	};
 
 	// Responsive srcSet: serve the right resolution for the column width
@@ -116,6 +112,7 @@ const ProjectCard = ({ item }) => {
 			onTouchStart={handleTouchStart}
 			onTouchEnd={handleTouchEnd}
 			onTouchCancel={handleTouchEnd}
+			onClick={handleClick}
 			ref={containerRef}
 		>
 			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>

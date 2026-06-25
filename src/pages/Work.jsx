@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/Work.css";
 import { sanityClient, urlFor } from "../sanity";
 
 const ProjectCard = ({ item }) => {
+	const navigate = useNavigate();
 	const containerRef = useRef(null);
 	const videoRef = useRef(null);
 	const [videoLoaded, setVideoLoaded] = useState(false);
@@ -11,8 +12,8 @@ const ProjectCard = ({ item }) => {
 	const [supportsHover, setSupportsHover] = useState(true);
 	const [isTouchPlaying, setIsTouchPlaying] = useState(false);
 	const [pendingPlay, setPendingPlay] = useState(false);
-	// Tracks whether the next click event was preceded by a touchstart that started the preview
-	const touchJustStartedRef = useRef(false);
+	const touchStartTimeRef = useRef(0);
+	const touchStartPosRef = useRef({ x: 0, y: 0 });
 
 	// Detect hover capability once on mount
 	useEffect(() => {
@@ -61,28 +62,37 @@ const ProjectCard = ({ item }) => {
 		}
 	};
 
-	const handleTouchStart = () => {
-		if (!supportsHover && item.videoUrl && !isTouchPlaying) {
-			touchJustStartedRef.current = true;
+	const handleTouchStart = (e) => {
+		if (!supportsHover && item.videoUrl) {
+			e.preventDefault(); // block the synthetic click so we control navigation
+			const t = e.touches[0];
+			touchStartTimeRef.current = Date.now();
+			touchStartPosRef.current = { x: t.clientX, y: t.clientY };
 			setIsTouchPlaying(true);
 			if (videoLoaded && videoRef.current) {
 				videoRef.current.currentTime = 0;
 				videoRef.current.play().catch(() => {});
 			} else {
-				// Video element not in DOM yet — trigger load and play via effect
 				setVideoLoaded(true);
 				setPendingPlay(true);
 			}
 		}
-		// If isTouchPlaying is already true, the next click will navigate normally
 	};
 
-	// Blocks navigation on the first tap so the preview can be seen;
-	// the second tap lets the click through to the project page
-	const handleClick = (e) => {
-		if (!supportsHover && item.videoUrl && touchJustStartedRef.current) {
-			e.preventDefault();
-			touchJustStartedRef.current = false;
+	const handleTouchEnd = (e) => {
+		if (!supportsHover) {
+			if (videoRef.current) videoRef.current.pause();
+			setPendingPlay(false);
+			setIsTouchPlaying(false);
+
+			// Navigate if it was a quick tap with minimal movement
+			const elapsed = Date.now() - touchStartTimeRef.current;
+			const t = e.changedTouches[0];
+			const dx = Math.abs(t.clientX - touchStartPosRef.current.x);
+			const dy = Math.abs(t.clientY - touchStartPosRef.current.y);
+			if (elapsed < 300 && dx < 10 && dy < 10) {
+				navigate(`/project/${item.projectId}`);
+			}
 		}
 	};
 
@@ -104,7 +114,8 @@ const ProjectCard = ({ item }) => {
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			onTouchStart={handleTouchStart}
-			onClick={handleClick}
+			onTouchEnd={handleTouchEnd}
+			onTouchCancel={handleTouchEnd}
 			ref={containerRef}
 		>
 			<div className={`media-wrapper ${imgLoaded ? "loaded" : ""}`}>

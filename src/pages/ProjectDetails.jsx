@@ -3,14 +3,15 @@ import { useParams } from "react-router-dom";
 import "../styles/ProjectDetails.css";
 import { sanityClient, urlFor } from "../sanity";
 
-const ClipCarousel = ({ clips }) => {
+const ClipCarousel = ({ clips, poster }) => {
 	const [current, setCurrent] = useState(0);
+	const [loaded, setLoaded] = useState(() => new Set());
 	const videoRefs = useRef([]);
 	const touchStartX = useRef(0);
 	const touchStartY = useRef(0);
 	const count = clips.length;
 
-	// Play the active clip, pause all others
+	// Play the active clip, pause others, and start buffering the next one
 	useEffect(() => {
 		videoRefs.current.forEach((v, i) => {
 			if (!v) return;
@@ -21,7 +22,20 @@ const ClipCarousel = ({ clips }) => {
 				v.pause();
 			}
 		});
-	}, [current]);
+		const nextIndex = (current + 1) % count;
+		const nextVideo = videoRefs.current[nextIndex];
+		if (nextVideo && nextVideo.preload === "none") {
+			nextVideo.preload = "auto";
+			nextVideo.load();
+		}
+	}, [current, count]);
+
+	const markLoaded = (i) =>
+		setLoaded((prev) => {
+			const s = new Set(prev);
+			s.add(i);
+			return s;
+		});
 
 	const prev = () => setCurrent((i) => (i - 1 + count) % count);
 	const next = () => setCurrent((i) => (i + 1) % count);
@@ -56,12 +70,17 @@ const ClipCarousel = ({ clips }) => {
 						<video
 							ref={(el) => (videoRefs.current[i] = el)}
 							src={url}
+							poster={poster}
 							className="clip-video"
 							muted
 							loop
 							playsInline
 							preload={i === 0 ? "auto" : "none"}
+							onCanPlay={() => markLoaded(i)}
 						/>
+						<div className={`clip-loading${loaded.has(i) ? " hidden" : ""}`}>
+							<div className="clip-spinner" />
+						</div>
 					</div>
 				))}
 			</div>
@@ -132,7 +151,10 @@ export default function ProjectDetails() {
 	return (
 		<div className="project-details">
 			{project.clips?.length > 0 && (
-				<ClipCarousel clips={project.clips} />
+				<ClipCarousel
+					clips={project.clips}
+					poster={project.thumbnail ? urlFor(project.thumbnail).width(1280).url() : undefined}
+				/>
 			)}
 			<div className="project-title">{project.title}</div>
 			{project.description && (
